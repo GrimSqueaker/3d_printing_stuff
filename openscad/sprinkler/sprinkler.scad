@@ -11,7 +11,7 @@ inlet_outer_diameter = 8.8; // mm
 inlet_length = 10; // mm
 inlet_wall_thickness = 1.0;
 
-outlet_diameter = 2.5; // mm
+outlet_diameter = 2.7; // mm
 outlet_count = 6;
 outlet_angle_span = 110; // degrees
 
