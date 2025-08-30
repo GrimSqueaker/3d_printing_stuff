@@ -61,28 +61,28 @@ module tube_grabber(inner_radius=12, grabber_thickness=1, thickness=5, opening_p
     }
 }
    
-// Dimensions of ring
-inner_diameter = 10.5;
-grabber_thickness = 1.5;
-grabber_height = 14;
-opening_percent = 0.9;
-
-// holder
-holder_width = 12;
-holder_length = 130;
-holder_thickness = 4;
-
-// anchor
-anchor_width = 20;
-anchor_thickness = 2;
-
-// other values
-tolerance = 0.02;
-tolerance1 = 1+tolerance;
-
 
 module sprinkler_holder()
 {
+    // Dimensions of ring
+    inner_diameter = 10.5;
+    grabber_thickness = 1.5;
+    grabber_height = 14;
+    opening_percent = 0.9;
+
+    // holder
+    holder_width = 12;
+    holder_length = 130;
+    holder_thickness = 4;
+
+    // anchor
+    anchor_width = 20;
+    anchor_thickness = 2;
+
+    // other values
+    tolerance = 0.02;
+    tolerance1 = 1+tolerance;
+    
     difference() {
         union() {
             holder_base(
