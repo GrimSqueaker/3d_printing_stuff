@@ -23,8 +23,8 @@ module drawRing()
     // panel holder
     holder_thickness = 1.5;
     holder_thickness_bottom = 1.0;
-    panel_thickness = 4;
-    panel_thickness_bottom = 4.2;
+    panel_thickness = 4.2;
+    panel_thickness_bottom = 4.4;
     panel_holder_width = 40;
     panel_holder_height = 10;
     panel_holder_thickness = panel_thickness + 2*holder_thickness;
