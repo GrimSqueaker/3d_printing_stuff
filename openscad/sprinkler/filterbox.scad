@@ -157,37 +157,68 @@ module create_clip_openings(wall) {
     }
 }
 
-module create_water_openings(wall) {
-    // hexagonal openings on the given wall
-    linear_extrude(height = 5)
-    circle(r=5, $fn=6);
-/*    bar_height = box_height - bar_top_spacing; // Leave space at top
+module create_hexagonal_prisms(width, length, height, radius, distance, x_shift=0, y_shift=0) {
+    // Calculate spacing based on your formula
+    y_spacing = 2*radius*sqrt(1 - 1/4) + distance;
+    x_spacing = y_spacing*sqrt(1 - 1/4);
     
-    if (wall == "front") {
-        for (i = [0,front_num_bars-1]) {
-            translate([wall_thickness + front_bar_start_offset + i * (bar_width + bar_spacing),
-                      outer_depth - wall_thickness - 0.01,
-                      wall_thickness])
-                cube([bar_width, bar_depth, bar_height]);
-        }
-    }    
-    else if (wall == "left") {
-        for (i = [0,side_num_bars-1]) {
-            translate([-0.01,
-                      wall_thickness + side_bar_start_offset + i * (bar_width + bar_spacing),
-                      wall_thickness])
-                cube([bar_depth, bar_width, bar_height]);
-        }
-    }    
-    else if (wall == "right") {
-        for (i = [0,side_num_bars-1]) {
-            translate([outer_width - bar_depth + 0.01,
-                      wall_thickness + side_bar_start_offset + i * (bar_width + bar_spacing),
-                      wall_thickness])
-                cube([bar_depth, bar_width, bar_height]);
+    // Calculate how many columns and rows we need to fill the area
+    // Add extra to ensure coverage when shifted
+    cols = ceil(width / x_spacing) + 2;
+    rows = ceil(length / y_spacing) + 2;
+    
+    // Create the bounding box for intersection
+    intersection() {
+        // Bounding box
+        translate([0, 0, 0])
+            cube([width, length, height]);
+        
+        // Hexagonal grid pattern with shifts applied
+        translate([x_shift, y_shift, 0]) {
+            for (col = [0:cols-1]) {
+                for (row = [0:rows-1]) {
+                    // Calculate position
+                    x_pos = col * x_spacing;
+                    // Offset every other column for hex packing
+                    y_pos = row * y_spacing + (col % 2) * (y_spacing / 2);
+                    
+                    // Only create hexagons that might intersect with the bounding box
+                    if (x_pos - radius < width + abs(x_shift) && 
+                        x_pos + radius > -abs(x_shift) &&
+                        y_pos - radius < length + abs(y_shift) && 
+                        y_pos + radius > -abs(y_shift)) {
+                        
+                        // Create hexagonal prism at position
+                        translate([x_pos, y_pos, 0]) {
+                            linear_extrude(height = height)
+                                circle(r = radius, $fn = 6);
+                        }
+                    }
+                }
+            }
         }
     }
-*/
+}
+
+module create_water_openings(wall) {
+    // hexagonal openings on the given wall
+    margin = 10;
+    
+    if (wall == "front") {
+        translate([margin,outer_depth-wall_thickness-0.01,wall_thickness])
+        rotate([0, -90, -90])
+        create_hexagonal_prisms(outer_height- bar_top_spacing - clip_opening_height, outer_width-2*margin, 3, 10, 5);
+    }    
+    else if (wall == "left") {
+        translate([wall_thickness+0.01,margin,wall_thickness])
+        rotate([0, -90, 0])
+        create_hexagonal_prisms(outer_height- bar_top_spacing - clip_opening_height, outer_depth-2*margin, 3, 10, 5, 0, -6.5);
+    }    
+    else if (wall == "right") {
+        translate([outer_width+0.01,margin,wall_thickness])
+        rotate([0, -90, 0])
+        create_hexagonal_prisms(outer_height- bar_top_spacing - clip_opening_height, outer_depth-2*margin, 3, 10, 5, 0, -6.5);
+    }
 }
 
 // === SNAP-ON LID ===
@@ -282,40 +313,6 @@ filter_box_complete();
 // filter_box_body();      // Just the main box
 // create_lid();          // Just the lid
 
-module create_hexagonal_prisms(cols, rows, height, radius, distance) {
-    // For hexagons with flat sides touching:
-    // - Horizontal spacing (between columns): radius * sqrt(3)
-    // - Vertical spacing (between rows): radius * 3/2
-    // - Every other column is offset by radius * 3/4
-    
-    hex_width = radius * sqrt(3);
-    hex_height = radius * 2;
-    
-    // When flat sides touch, the actual spacing is:
-    y_spacing = 2*radius*sqrt(1 - 1/4) + distance;
-    x_spacing = y_spacing*sqrt(1 - 1/4);
-    
-    for (col = [0:cols-1]) {
-        for (row = [0:rows-1]) {
-            // Calculate position
-            x_pos = col * x_spacing;
-            // Offset every other column for hex packing
-            y_pos = row * y_spacing + (col % 2) * (y_spacing / 2);
-            
-            // Create hexagonal prism at position
-            translate([x_pos, y_pos, 0]) {
-                rotate([0, 0, 0]) {  // Rotate 30 degrees so flat sides are vertical
-                    linear_extrude(height = height)
-                        circle(r = radius, $fn = 6);
-                }
-            }
-        }
-    }
-}
-
-// For perfect tessellation (no gaps), use distance = 0
-translate([-50, -50, 0])
-    create_hexagonal_prisms(6, 6, 3, 5, 2);  // Larger hexagons, no gaps
 
 
 
